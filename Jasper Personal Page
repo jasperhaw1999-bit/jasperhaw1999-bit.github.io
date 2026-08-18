@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zhenpeng He | Academic Profile</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --text-color: #1f2937;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --accent-color: #2563eb;
+            --muted-color: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--muted-color);
+            margin: 0;
+        }
+
+        section {
+            background: var(--card-bg);
+            padding: 1.75rem 2rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            font-size: 1.35rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid #eff6ff;
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 1.25rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .pub-item, .exp-item, .edu-item {
+            margin-bottom: 1.25rem;
+        }
+
+        .pub-item:last-child, .exp-item:last-child, .edu-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .pub-title {
+            font-weight: 600;
+        }
+
+        .pub-authors {
+            color: var(--text-color);
+        }
+
+        .pub-journal {
+            font-style: italic;
+            color: var(--muted-color);
+        }
+
+        .badge-container {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.35rem;
+        }
+
+        .badge {
+            background-color: #eff6ff;
+            color: var(--accent-color);
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            border: 1px solid #bfdbfe;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+
+        .item-title {
+            font-weight: 600;
+        }
+
+        .item-date {
+            color: var(--muted-color);
+            font-size: 0.9rem;
+        }
+
+        .item-sub {
+            color: var(--muted-color);
+            font-size: 0.95rem;
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 1rem;
+            }
+            section {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <h1>Zhenpeng He</h1>
+            <p class="subtitle">Academic Researcher | Information Systems & Digital Economy</p>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- Research Interests -->
+        <section>
+            <h2>Research Interests</h2>
+            <ul>
+                <li>Music Streaming Platforms & Artist Discovery</li>
+                <li>Platform-based Internationalization</li>
+                <li>Digitalization in Content Industries</li>
+                <li>Consumer Decision-Making on Digital Platforms</li>
+            </ul>
+        </section>
+
+        <!-- Published Research -->
+        <section>
+            <h2>Published Research</h2>
+            <div class="pub-item">
+                <div class="pub-title">
+                    <a href="https://doi.org/10.1108/JEIM-08-2022-0280" target="_blank">Digital Transformation Ambidexterity and Business Performance</a>
+                </div>
+                <div class="pub-authors">Jianmei Liu, Qianru Liu, & Zhenpeng He</div>
+                <div class="pub-journal">Journal of Enterprise Information Management</div>
+                <div class="badge-container">
+                    <span class="badge">SSCI Q1</span>
+                    <span class="badge">Impact Factor: 6.5</span>
+                    <span class="badge">ABDC: A</span>
+                    <span class="badge">ABS: 2</span>
+                    <span class="badge">Cited 60+ times</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Working Papers -->
+        <section>
+            <h2>Projects in Progress</h2>
+            
+            <div class="pub-item">
+                <div class="pub-title">Hit-maker or Star-makers? Playlist Inclusion and Artist-specific Performance: Evidence From Spotify</div>
+                <div class="pub-authors">With Chen Zhang, Abhay Mishra</div>
+                <div class="pub-journal">Status: In preparation for journal submission</div>
+            </div>
+
+            <div class="pub-item">
+                <div class="pub-title">Prompts Make Streaming Stars? The Impact of Prompting Style on Perceived Music Quality and Perceived Human Ownership</div>
+                <div class="pub-authors">With Lingyao (Ivy) Yuan</div>
+                <div class="pub-journal">Status: In preparation for journal submission</div>
+            </div>
+
+            <div class="pub-item">
+                <div class="pub-title">Sensitive to the Digital Touch: Exploring Sensory Processing Sensitivity and Social Sensitivity with Anthropomorphized Products in E-Commerce</div>
+                <div class="pub-authors">With Lingyao (Ivy) Yuan, Jordan Barlow</div>
+                <div class="pub-journal">Status: In preparation for journal submission</div>
+            </div>
+        </section>
+
+        <!-- Education -->
+        <section>
+            <h2>Education</h2>
+
+            <div class="edu-item">
+                <div class="item-header">
+                    <span class="item-title">University of International Business and Economics</span>
+                    <span class="item-date">2022.09 – 2024.06</span>
+                </div>
+                <div class="item-sub">M.Res. in Innovation and Entrepreneurship | Beijing, China (GPA: 3.51)</div>
+            </div>
+
+            <div class="edu-item">
+                <div class="item-header">
+                    <span class="item-title">University of Cologne</span>
+                    <span class="item-date">2023.10 – 2024.02</span>
+                </div>
+                <div class="item-sub">Academic Exchange Program | Cologne, Germany</div>
+                <div class="item-sub"><em>Coursework:</em> Advanced IS Research for Sustainable Society, Machine Learning & AI, Political Psychology</div>
+            </div>
+
+            <div class="edu-item">
+                <div class="item-header">
+                    <span class="item-title">Guangdong University of Foreign Studies</span>
+                    <span class="item-date">2017.09 – 2021.06</span>
+                </div>
+                <div class="item-sub">B.A. in Accounting | Guangzhou, China (GPA: 3.72)</div>
+            </div>
+        </section>
+
+        <!-- Grants & Funding -->
+        <section>
+            <h2>Grants & Honors</h2>
+            <ul>
+                <li><strong>Ivy College of Business Ph.D. Student Research Grant</strong>, Iowa State University</li>
+                <li><strong>Scientific Research and Innovation Funding for Graduate Students</strong>, University of International Business and Economics <em>(Application Acceptance Rate: 40%)</em></li>
+            </ul>
+        </section>
+
+        <!-- Skills & Experience Grid -->
+        <div class="grid-2">
+            <section>
+                <h2>Skills & Scores</h2>
+                <p><strong>Software:</strong></p>
+                <ul>
+                    <li>Stata (Fluent)</li>
+                    <li>Python (Basic)</li>
+                    <li>R (Introductory)</li>
+                </ul>
+                <p style="margin-top: 1rem;"><strong>Test Scores:</strong></p>
+                <ul>
+                    <li>GMAT: 690 (85%) | Q50 (86%), V33 (68%)</li>
+                    <li>IELTS: 7.5</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Professional Experience</h2>
+                <div class="exp-item">
+                    <div class="item-title">Google</div>
+                    <div class="item-sub">Intern, KOL & Influencer Dept (International Marketing) | 2021</div>
+                </div>
+                <div class="exp-item">
+                    <div class="item-title">MKBP</div>
+                    <div class="item-sub">Audit Intern, NASDAQ IPO Project | 2021</div>
+                </div>
+                <div class="exp-item">
+                    <div class="item-title">Midea Group (Fortune 500)</div>
+                    <div class="item-sub">Summer Intern, Corporate Finance Dept | 2019</div>
+                </div>
+            </section>
+        </div>
+
+    </div>
+
+</body>
+</html>
