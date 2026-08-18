@@ -15,6 +15,10 @@
             --muted-color: #64748b;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6;
@@ -24,12 +28,59 @@
             padding: 0;
         }
 
+        /* Sticky Navigation Bar */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .nav-brand {
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.25rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            color: var(--muted-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
             padding: 2rem 1.5rem;
         }
 
+        /* Header & Profile Photo Layout */
         header {
             background-color: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
@@ -42,11 +93,29 @@
             max-width: 900px;
             margin: 0 auto;
             padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-text {
+            flex: 1;
+            min-width: 280px;
         }
 
         h1 {
             margin: 0 0 0.5rem 0;
-            font-size: 2.5rem;
+            font-size: 2.25rem;
             color: var(--primary-color);
             letter-spacing: -0.025em;
         }
@@ -54,19 +123,51 @@
         .subtitle {
             font-size: 1.1rem;
             color: var(--muted-color);
-            margin: 0;
+            margin: 0 0 1rem 0;
+        }
+
+        .contact-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .contact-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            background-color: #f1f5f9;
+            color: var(--text-color);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .contact-btn:hover {
+            background-color: #e2e8f0;
+            color: var(--primary-color);
+            text-decoration: none;
         }
 
         section {
             background: var(--card-bg);
             padding: 1.75rem 2rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             border-radius: 8px;
             border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+            scroll-margin-top: 4rem;
+        }
+
+        section:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         h2 {
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             color: var(--primary-color);
             border-bottom: 2px solid #eff6ff;
             padding-bottom: 0.5rem;
@@ -160,6 +261,10 @@
         }
 
         @media (max-width: 640px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
             .grid-2 {
                 grid-template-columns: 1fr;
             }
@@ -174,10 +279,32 @@
 </head>
 <body>
 
-    <header>
+    <!-- Navigation Menu -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="nav-brand">Zhenpeng He</a>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#publications">Publications</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#education">Education</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header Section with Photo -->
+    <header id="about">
         <div class="header-content">
-            <h1>Zhenpeng He</h1>
-            <p class="subtitle">Academic Researcher | Information Systems & Digital Economy</p>
+            <img src="Headphoto" alt="Zhenpeng He" class="profile-img">
+            <div class="header-text">
+                <h1>Zhenpeng He</h1>
+                <p class="subtitle">Academic Researcher | Information Systems & Digital Economy</p>
+                <div class="contact-links">
+                    <a href="mailto:your-email@example.com" class="contact-btn">Email</a>
+                    <a href="https://github.com/jasperhaw1999-bit" class="contact-btn" target="_blank">GitHub</a>
+                    <a href="#" class="contact-btn">Google Scholar</a>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -195,7 +322,7 @@
         </section>
 
         <!-- Published Research -->
-        <section>
+        <section id="publications">
             <h2>Published Research</h2>
             <div class="pub-item">
                 <div class="pub-title">
@@ -214,7 +341,7 @@
         </section>
 
         <!-- Working Papers -->
-        <section>
+        <section id="projects">
             <h2>Projects in Progress</h2>
             
             <div class="pub-item">
@@ -237,7 +364,7 @@
         </section>
 
         <!-- Education -->
-        <section>
+        <section id="education">
             <h2>Education</h2>
 
             <div class="edu-item">
