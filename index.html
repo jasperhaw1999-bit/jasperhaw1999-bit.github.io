@@ -254,19 +254,10 @@
             text-decoration: underline;
         }
 
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
         @media (max-width: 640px) {
             .header-content {
                 flex-direction: column;
                 text-align: center;
-            }
-            .grid-2 {
-                grid-template-columns: 1fr;
             }
             .container {
                 padding: 1rem;
@@ -343,25 +334,30 @@
         <!-- Working Papers -->
         <section id="projects">
             <h2>Projects in Progress</h2>
+
             
+            <div class="pub-item">
+                <div class="pub-title">*Personality Traits and E-commerce*</div>
+                <div class="pub-authors">With Lingyao (Ivy) Yuan, Jordan Barlow</div>
+                <div class="pub-journal">Status: Under Review at UTD24 Journal</div>
+            </div>
             <div class="pub-item">
                 <div class="pub-title">Hit-maker or Star-makers? Playlist Inclusion and Artist-specific Performance: Evidence From Spotify</div>
                 <div class="pub-authors">With Chen Zhang, Abhay Mishra</div>
-                <div class="pub-journal">Status: In preparation for journal submission</div>
+                <div class="pub-journal">Status: Conditionally Accepted by ICIS 2026, Lisbon; In preparation for journal submission</div>
+                <div class="pub-authors">Invited Talks:</div>
+                <div class="pub-authors">POMS Conference 2026, Reno, USA</div>
+                <div class="pub-authors">SCECR (Workshop on Statistical Challenges in E-Commerce Research) 2025, Paphos, Cyprus</div>
             </div>
 
             <div class="pub-item">
-                <div class="pub-title">Prompts Make Streaming Stars? The Impact of Prompting Style on Perceived Music Quality and Perceived Human Ownership</div>
+                <div class="pub-title">*AI and Music Perception*</div>
                 <div class="pub-authors">With Lingyao (Ivy) Yuan</div>
                 <div class="pub-journal">Status: In preparation for journal submission</div>
             </div>
 
-            <div class="pub-item">
-                <div class="pub-title">Sensitive to the Digital Touch: Exploring Sensory Processing Sensitivity and Social Sensitivity with Anthropomorphized Products in E-Commerce</div>
-                <div class="pub-authors">With Lingyao (Ivy) Yuan, Jordan Barlow</div>
-                <div class="pub-journal">Status: In preparation for journal submission</div>
-            </div>
         </section>
+
 
         <!-- Education -->
         <section id="education">
@@ -373,15 +369,6 @@
                     <span class="item-date">2022.09 – 2024.06</span>
                 </div>
                 <div class="item-sub">M.Res. in Innovation and Entrepreneurship | Beijing, China (GPA: 3.51)</div>
-            </div>
-
-            <div class="edu-item">
-                <div class="item-header">
-                    <span class="item-title">University of Cologne</span>
-                    <span class="item-date">2023.10 – 2024.02</span>
-                </div>
-                <div class="item-sub">Academic Exchange Program | Cologne, Germany</div>
-                <div class="item-sub"><em>Coursework:</em> Advanced IS Research for Sustainable Society, Machine Learning & AI, Political Psychology</div>
             </div>
 
             <div class="edu-item">
@@ -402,39 +389,22 @@
             </ul>
         </section>
 
-        <!-- Skills & Experience Grid -->
-        <div class="grid-2">
-            <section>
-                <h2>Skills & Scores</h2>
-                <p><strong>Software:</strong></p>
-                <ul>
-                    <li>Stata (Fluent)</li>
-                    <li>Python (Basic)</li>
-                    <li>R (Introductory)</li>
-                </ul>
-                <p style="margin-top: 1rem;"><strong>Test Scores:</strong></p>
-                <ul>
-                    <li>GMAT: 690 (85%) | Q50 (86%), V33 (68%)</li>
-                    <li>IELTS: 7.5</li>
-                </ul>
-            </section>
-
-            <section>
-                <h2>Professional Experience</h2>
-                <div class="exp-item">
-                    <div class="item-title">Google</div>
-                    <div class="item-sub">Intern, KOL & Influencer Dept (International Marketing) | 2021</div>
-                </div>
-                <div class="exp-item">
-                    <div class="item-title">MKBP</div>
-                    <div class="item-sub">Audit Intern, NASDAQ IPO Project | 2021</div>
-                </div>
-                <div class="exp-item">
-                    <div class="item-title">Midea Group (Fortune 500)</div>
-                    <div class="item-sub">Summer Intern, Corporate Finance Dept | 2019</div>
-                </div>
-            </section>
-        </div>
+        <!-- Professional Experience -->
+        <section>
+            <h2>Professional Experience</h2>
+            <div class="exp-item">
+                <div class="item-title">Google</div>
+                <div class="item-sub">Intern, KOL & Influencer Dept (International Marketing) | 2021</div>
+            </div>
+            <div class="exp-item">
+                <div class="item-title">MKBP</div>
+                <div class="item-sub">Audit Intern, NASDAQ IPO Project | 2021</div>
+            </div>
+            <div class="exp-item">
+                <div class="item-title">Midea Group (Fortune 500)</div>
+                <div class="item-sub">Summer Intern, Corporate Finance Dept | 2019</div>
+            </div>
+        </section>
 
     </div>
 
