@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <title>Resonance | Emotional Support</title>
     <style>
-        /* Applies a high-quality serif font similar to the reference image */
         @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap');
         
         body { 
             font-family: 'Merriweather', 'Georgia', serif; 
-            background-color: #FFF6ED; /* Warm, light orange background */
+            background-color: #FFF6ED; 
             color: #3E2723;
             margin: 0;
             display: flex;
@@ -34,7 +33,6 @@
             color: #D84315;
         }
 
-        /* Conversational Chat Layout */
         #chatContainer {
             flex-grow: 1;
             width: 100%;
@@ -53,7 +51,8 @@
             max-width: 75%;
             line-height: 1.6;
             font-size: 16px;
-            animation: fadeIn 0.3s ease-in-out;
+            white-space: pre-wrap; /* Preserves spaces from the streaming chunks */
+            animation: fadeInBubble 0.3s ease-in-out;
         }
 
         .user-msg {
@@ -72,7 +71,22 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
-        /* Controls & Visualizer */
+        /* NEW: The animation for the streaming text chunks */
+        .fade-in-text {
+            opacity: 0;
+            animation: streamWordFade 0.6s ease-out forwards;
+        }
+
+        @keyframes streamWordFade {
+            0% { opacity: 0; color: rgba(78, 52, 46, 0); }
+            100% { opacity: 1; color: rgba(78, 52, 46, 1); } /* Solidyzes to #4E342E */
+        }
+
+        @keyframes fadeInBubble {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .controls-wrapper {
             width: 100%;
             background: #FFFFFF;
@@ -100,7 +114,7 @@
             cursor: pointer; 
             border-radius: 30px; 
             border: none; 
-            background: #F4511E; /* Warm terra cotta */
+            background: #F4511E; 
             color: white; 
             transition: all 0.2s ease;
             display: flex;
@@ -111,7 +125,6 @@
 
         button:hover { background: #D84315; }
         
-        /* The requested SVG Ear Icon */
         .ear-icon {
             width: 22px;
             height: 22px;
@@ -128,11 +141,6 @@
             margin-top: 15px;
             font-family: system-ui, sans-serif;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 <body>
@@ -142,7 +150,6 @@
     </div>
 
     <div id="chatContainer">
-        <!-- Chat bubbles will be injected here automatically -->
         <div class="message ai-msg">Hello. Take a deep breath. I'm here to listen whenever you are ready to speak.</div>
     </div>
 
@@ -169,7 +176,6 @@
         const statusText = document.getElementById('statusText');
         const chatContainer = document.getElementById('chatContainer');
 
-        // Stores the complete conversation history to send to Gemini
         let conversationLog = [];
         let activeUserBubble = null;
 
@@ -199,7 +205,6 @@
                     drawWaveform();
                     recognition.start();
                     
-                    // Create a new empty bubble for the user's incoming speech
                     activeUserBubble = document.createElement('div');
                     activeUserBubble.className = 'message user-msg';
                     activeUserBubble.textContent = '...';
@@ -207,7 +212,7 @@
                     chatContainer.scrollTop = chatContainer.scrollHeight;
                     
                     btnText.textContent = "Stop & Reflect";
-                    recordBtn.style.background = "#D32F2F"; // Dark red for stopping
+                    recordBtn.style.background = "#D32F2F"; 
                     statusText.textContent = "Listening... Take your time.";
                     isRecording = true;
                     
@@ -221,7 +226,6 @@
                 
                 const finalTranscript = activeUserBubble.textContent;
                 
-                // Only send to AI if the user actually spoke words
                 if (finalTranscript !== '...' && finalTranscript.trim() !== '') {
                     await fetchGeminiResponse(finalTranscript);
                 } else {
@@ -233,7 +237,6 @@
             }
         });
 
-        // Continuously types into the current chat bubble
         recognition.onresult = (event) => {
             let currentText = '';
             for (let i = 0; i < event.results.length; i++) {
@@ -262,7 +265,6 @@
             }
             cancelAnimationFrame(animationId);
             
-            // Draw a flat baseline when stopped
             canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
             canvasCtx.lineWidth = 2;
             canvasCtx.strokeStyle = '#FFCC80';
@@ -272,7 +274,6 @@
             canvasCtx.stroke();
         }
 
-        // Adapted aesthetic waveform drawing
         function drawWaveform() {
             animationId = requestAnimationFrame(drawWaveform);
             const bufferLength = analyser.frequencyBinCount;
@@ -281,7 +282,7 @@
 
             canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
             canvasCtx.lineWidth = 2.5;
-            canvasCtx.strokeStyle = '#E64A19'; // Warm orange wave
+            canvasCtx.strokeStyle = '#E64A19'; 
             canvasCtx.beginPath();
 
             const sliceWidth = canvas.width * 1.0 / bufferLength;
@@ -299,26 +300,24 @@
         }
 
         async function fetchGeminiResponse(promptText) {
-            // Add user's new message to the running history array
             conversationLog.push({
                 role: "user",
                 parts: [{ text: promptText }]
             });
 
-            // Creates a temporary AI loading bubble
             const aiBubble = document.createElement('div');
             aiBubble.className = 'message ai-msg';
-            aiBubble.textContent = '...';
             chatContainer.appendChild(aiBubble);
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${GEMINI_API_KEY}`;
+            // UPDATED: Using streamGenerateContent with Server-Sent Events (alt=sse)
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
             
             const payload = {
                 systemInstruction: {
                     parts: [{ text: "You are an empathetic, warm conversational AI providing emotional support. Listen carefully to the user's dictated thoughts, validate their feelings, and respond with thoughtful, natural conversational dialogue. Keep responses relatively brief and conversational, avoiding overly dense text blocks." }]
                 },
-                contents: conversationLog // Sends the whole history instead of just one prompt
+                contents: conversationLog 
             };
 
             try {
@@ -328,34 +327,67 @@
                     body: JSON.stringify(payload)
                 });
                 
-                const data = await response.json();
-                
-                if (response.ok && data.candidates && data.candidates.length > 0) {
-                    const aiResponseText = data.candidates[0].content.parts[0].text;
-                    
-                    // Update UI with the final response
-                    aiBubble.textContent = aiResponseText;
-                    statusText.textContent = "Ready.";
-                    
-                    // Save Gemini's response to the history array so it remembers it next time
-                    conversationLog.push({
-                        role: "model",
-                        parts: [{ text: aiResponseText }]
-                    });
+                // Read the stream live
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let buffer = '';
+                let fullAiText = '';
 
-                } else {
-                    aiBubble.textContent = `API Error: ${data.error?.message || "Unknown error"}`;
-                    // Remove the failed user prompt from the log so it doesn't break future turns
-                    conversationLog.pop(); 
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // Keep incomplete lines in the buffer
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const dataStr = line.slice(6);
+                            if (dataStr === '[DONE]') continue;
+                            
+                            try {
+                                const data = JSON.parse(dataStr);
+                                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                                    const chunkText = data.candidates[0].content.parts[0].text;
+                                    fullAiText += chunkText;
+                                    
+                                    // Split by words to apply animation to each incoming piece individually
+                                    const words = chunkText.split(/(\s+)/);
+                                    words.forEach(word => {
+                                        if (word.length > 0) {
+                                            const span = document.createElement('span');
+                                            span.textContent = word;
+                                            if (word.trim() !== '') {
+                                                span.className = 'fade-in-text';
+                                            }
+                                            aiBubble.appendChild(span);
+                                        }
+                                    });
+                                    
+                                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                                }
+                            } catch (e) {
+                                console.error("Error parsing stream chunk:", e);
+                            }
+                        }
+                    }
                 }
+                
+                statusText.textContent = "Ready.";
+                
+                // Save the full combined response to history
+                conversationLog.push({
+                    role: "model",
+                    parts: [{ text: fullAiText }]
+                });
+
             } catch (error) {
                 aiBubble.textContent = "Error connecting to Gemini API network.";
                 conversationLog.pop();
             }
-            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
         
-        // Initialize flat baseline on load
         stopRecordingState();
     </script>
 </body>
