@@ -330,4 +330,33 @@
                 
                 const data = await response.json();
                 
-                if (response.ok && data.candidates &&
+                if (response.ok && data.candidates && data.candidates.length > 0) {
+                    const aiResponseText = data.candidates[0].content.parts[0].text;
+                    
+                    // Update UI with the final response
+                    aiBubble.textContent = aiResponseText;
+                    statusText.textContent = "Ready.";
+                    
+                    // Save Gemini's response to the history array so it remembers it next time
+                    conversationLog.push({
+                        role: "model",
+                        parts: [{ text: aiResponseText }]
+                    });
+
+                } else {
+                    aiBubble.textContent = `API Error: ${data.error?.message || "Unknown error"}`;
+                    // Remove the failed user prompt from the log so it doesn't break future turns
+                    conversationLog.pop(); 
+                }
+            } catch (error) {
+                aiBubble.textContent = "Error connecting to Gemini API network.";
+                conversationLog.pop();
+            }
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Initialize flat baseline on load
+        stopRecordingState();
+    </script>
+</body>
+</html>
