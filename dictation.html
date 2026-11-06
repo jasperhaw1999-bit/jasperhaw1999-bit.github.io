@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Voice to Gemini Interface</title>
+    <style>
+        body { 
+            font-family: system-ui, sans-serif; 
+            max-width: 600px; 
+            margin: 40px auto; 
+            text-align: center; 
+            color: #333;
+        }
+        canvas { 
+            background: #f8f9fa; 
+            border-radius: 8px; 
+            margin: 20px 0; 
+            display: block; 
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+        button { 
+            padding: 12px 24px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            border-radius: 20px; 
+            border: none; 
+            background: #007bff; 
+            color: white; 
+            transition: background 0.2s;
+        }
+        button:disabled {
+            background: #ccc;
+        }
+        #response-box { 
+            margin-top: 20px; 
+            padding: 20px; 
+            background: #eef2f5; 
+            text-align: left; 
+            border-radius: 8px; 
+        }
+        .status {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>AI Dictation Interface</h2>
+    <canvas id="visualizer" width="600" height="150"></canvas>
+    <button id="recordBtn">Start Dictation</button>
+    <div id="statusText" class="status">Click "Start Dictation" and allow microphone access.</div>
+    
+    <div id="response-box">
+        <p><strong>Transcript:</strong> <span id="transcriptText">...</span></p>
+        <p><strong>Gemini:</strong> <span id="answerText">...</span></p>
+    </div>
+
+    <script>
+        const GEMINI_API_KEY = "AQ.Ab8RN6J9Ox1f-mDV1Xo9QpWplgUN2CTXRFQR901VNXnm2cKH8w";
+        
+        let audioContext, analyser, animationId, stream;
+        const recordBtn = document.getElementById('recordBtn');
+        const canvas = document.getElementById('visualizer');
+        const canvasCtx = canvas.getContext('2d');
+        const statusText = document.getElementById('statusText');
+        const transcriptText = document.getElementById('transcriptText');
+        const answerText = document.getElementById('answerText');
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            statusText.textContent = "Speech Recognition API not supported in this browser. Please use Chrome.";
+            recordBtn.disabled = true;
+        }
+        
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        let isRecording = false;
+
+        recordBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const source = audioContext.createMediaStreamSource(stream);
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 2048;
+                    source.connect(analyser);
+                    
+                    drawWaveform();
+                    recognition.start();
+                    
+                    recordBtn.textContent = "Stop & Submit";
+                    recordBtn.style.background = "#dc3545";
+                    statusText.textContent = "Listening...";
+                    isRecording = true;
+                    transcriptText.textContent = "...";
+                    answerText.textContent = "...";
+                    
+                } catch (err) {
+                    statusText.textContent = "Microphone access denied.";
+                }
+            } else {
+                recognition.stop();
+                stopRecordingState();
+            }
+        });
+
+        recognition.onresult = async (event) => {
+            const transcript = event.results[0][0].transcript;
+            transcriptText.textContent = transcript;
+            statusText.textContent = "Sending to Gemini...";
+            
+            await fetchGeminiResponse(transcript);
+            stopRecordingState();
+        };
+
+        recognition.onerror = (event) => {
+            statusText.textContent = "Error occurred in recognition: " + event.error;
+            stopRecordingState();
+        };
+
+        function stopRecordingState() {
+            isRecording = false;
+            recordBtn.textContent = "Start Dictation";
+            recordBtn.style.background = "#007bff";
+            
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+            cancelAnimationFrame(animationId);
+            
+            canvasCtx.fillStyle = '#f8f9fa';
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+            canvasCtx.lineWidth = 2;
+            canvasCtx.strokeStyle = '#007bff';
+            canvasCtx.beginPath();
+            canvasCtx.moveTo(0, canvas.height / 2);
+            canvasCtx.lineTo(canvas.width, canvas.height / 2);
+            canvasCtx.stroke();
+        }
+
+        function drawWaveform() {
+            animationId = requestAnimationFrame(drawWaveform);
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteTimeDomainData(dataArray);
+
+            canvasCtx.fillStyle = '#f8f9fa';
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+            canvasCtx.lineWidth = 2;
+            canvasCtx.strokeStyle = '#007bff';
+            canvasCtx.beginPath();
+
+            const sliceWidth = canvas.width * 1.0 / bufferLength;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const v = dataArray[i] / 128.0;
+                const y = v * canvas.height / 2;
+                if (i === 0) canvasCtx.moveTo(x, y);
+                else canvasCtx.lineTo(x, y);
+                x += sliceWidth;
+            }
+            canvasCtx.lineTo(canvas.width, canvas.height / 2);
+            canvasCtx.stroke();
+        }
+
+        async function fetchGeminiResponse(promptText) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+            
+            const payload = {
+                systemInstruction: {
+                    parts: [{ text: "You are an AI assistant processing raw dictation text. Ignore disfluencies. Provide a highly dense, concise response." }]
+                },
+                contents: [{
+                    parts: [{ text: promptText }]
+                }]
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.candidates && data.candidates.length > 0) {
+                    answerText.textContent = data.candidates[0].content.parts[0].text;
+                    statusText.textContent = "Done.";
+                } else {
+                    answerText.textContent = `API Error: ${data.error?.message || "Unknown error"}`;
+                    console.error("Full API Response:", data);
+                }
+            } catch (error) {
+                answerText.textContent = "Error connecting to Gemini API network.";
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
