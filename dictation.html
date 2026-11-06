@@ -187,8 +187,8 @@
         }
 
         async function fetchGeminiResponse(promptText) {
-            // Upgraded to the Pro model for deep conversational comprehension
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
+            // FIXED: Upgraded to the current gemini-3.8-pro model
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-pro:generateContent?key=${GEMINI_API_KEY}`;
             
             const payload = {
                 systemInstruction: {
