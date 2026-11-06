@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resonance | Emotional Support</title>
+    <style>
+        /* Applies a high-quality serif font similar to the reference image */
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap');
+        
+        body { 
+            font-family: 'Merriweather', 'Georgia', serif; 
+            background-color: #FFF6ED; /* Warm, light orange background */
+            color: #3E2723;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            align-items: center;
+        }
+
+        .header {
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            background-color: #FFE0B2;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-weight: 400;
+            font-size: 24px;
+            color: #D84315;
+        }
+
+        /* Conversational Chat Layout */
+        #chatContainer {
+            flex-grow: 1;
+            width: 100%;
+            max-width: 800px;
+            padding: 30px 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-sizing: border-box;
+        }
+
+        .message {
+            padding: 15px 22px;
+            border-radius: 18px;
+            max-width: 75%;
+            line-height: 1.6;
+            font-size: 16px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .user-msg {
+            background-color: #FFFFFF;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid #FFE0B2;
+        }
+
+        .ai-msg {
+            background-color: #FFECB3;
+            color: #4E342E;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        /* Controls & Visualizer */
+        .controls-wrapper {
+            width: 100%;
+            background: #FFFFFF;
+            border-top: 1px solid #FFE0B2;
+            padding: 20px 0 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.03);
+        }
+
+        canvas { 
+            background: transparent; 
+            display: block; 
+            width: 100%;
+            max-width: 600px;
+            height: 80px;
+            margin-bottom: 15px;
+        }
+
+        button { 
+            padding: 14px 28px; 
+            font-size: 16px; 
+            font-family: inherit;
+            cursor: pointer; 
+            border-radius: 30px; 
+            border: none; 
+            background: #F4511E; /* Warm terra cotta */
+            color: white; 
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 12px rgba(244, 81, 30, 0.3);
+        }
+
+        button:hover { background: #D84315; }
+        
+        /* The requested SVG Ear Icon */
+        .ear-icon {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .status {
+            font-size: 0.9em;
+            color: #8D6E63;
+            margin-top: 15px;
+            font-family: system-ui, sans-serif;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>Resonance: A Listening Ear</h2>
+    </div>
+
+    <div id="chatContainer">
+        <!-- Chat bubbles will be injected here automatically -->
+        <div class="message ai-msg">Hello. Take a deep breath. I'm here to listen whenever you are ready to speak.</div>
+    </div>
+
+    <div class="controls-wrapper">
+        <canvas id="visualizer" width="600" height="80"></canvas>
+        <button id="recordBtn">
+            <svg class="ear-icon" viewBox="0 0 24 24">
+                <path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"></path>
+                <path d="M15 8.5a2.5 2.5 0 0 0-5 0v1a2 2 0 1 1 0 4"></path>
+            </svg>
+            <span id="btnText">Begin Dictation</span>
+        </button>
+        <div id="statusText" class="status">Click to open your microphone.</div>
+    </div>
+
+    <script>
+        const GEMINI_API_KEY = "AQ.Ab8RN6KotfNZ7t_-" + "v0kH6km0uumNoTRzspIPkvvgHmtHwbVOPg";
+        
+        let audioContext, analyser, animationId, stream;
+        const recordBtn = document.getElementById('recordBtn');
+        const btnText = document.getElementById('btnText');
+        const canvas = document.getElementById('visualizer');
+        const canvasCtx = canvas.getContext('2d');
+        const statusText = document.getElementById('statusText');
+        const chatContainer = document.getElementById('chatContainer');
+
+        // Stores the complete conversation history to send to Gemini
+        let conversationLog = [];
+        let activeUserBubble = null;
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            statusText.textContent = "Speech Recognition API not supported in this browser. Please use Chrome.";
+            recordBtn.disabled = true;
+        }
+        
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true; 
+        recognition.interimResults = true; 
+        recognition.lang = 'en-US';
+
+        let isRecording = false;
+
+        recordBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const source = audioContext.createMediaStreamSource(stream);
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 2048;
+                    source.connect(analyser);
+                    
+                    drawWaveform();
+                    recognition.start();
+                    
+                    // Create a new empty bubble for the user's incoming speech
+                    activeUserBubble = document.createElement('div');
+                    activeUserBubble.className = 'message user-msg';
+                    activeUserBubble.textContent = '...';
+                    chatContainer.appendChild(activeUserBubble);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    
+                    btnText.textContent = "Stop & Reflect";
+                    recordBtn.style.background = "#D32F2F"; // Dark red for stopping
+                    statusText.textContent = "Listening... Take your time.";
+                    isRecording = true;
+                    
+                } catch (err) {
+                    statusText.textContent = "Microphone access denied.";
+                }
+            } else {
+                isRecording = false;
+                recognition.stop();
+                statusText.textContent = "Processing your thoughts...";
+                
+                const finalTranscript = activeUserBubble.textContent;
+                
+                // Only send to AI if the user actually spoke words
+                if (finalTranscript !== '...' && finalTranscript.trim() !== '') {
+                    await fetchGeminiResponse(finalTranscript);
+                } else {
+                    activeUserBubble.remove();
+                    statusText.textContent = "No speech detected. Click to try again.";
+                }
+                
+                stopRecordingState();
+            }
+        });
+
+        // Continuously types into the current chat bubble
+        recognition.onresult = (event) => {
+            let currentText = '';
+            for (let i = 0; i < event.results.length; i++) {
+                currentText += event.results[i][0].transcript;
+            }
+            if (activeUserBubble) {
+                activeUserBubble.textContent = currentText;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        };
+
+        recognition.onerror = (event) => {
+            statusText.textContent = "Error occurred: " + event.error;
+            stopRecordingState();
+        };
+
+        function stopRecordingState() {
+            btnText.textContent = "Begin Dictation";
+            recordBtn.style.background = "#F4511E";
+            
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+            cancelAnimationFrame(animationId);
+            
+            // Draw a flat baseline when stopped
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            canvasCtx.lineWidth = 2;
+            canvasCtx.strokeStyle = '#FFCC80';
+            canvasCtx.beginPath();
+            canvasCtx.moveTo(0, canvas.height / 2);
+            canvasCtx.lineTo(canvas.width, canvas.height / 2);
+            canvasCtx.stroke();
+        }
+
+        // Adapted aesthetic waveform drawing
+        function drawWaveform() {
+            animationId = requestAnimationFrame(drawWaveform);
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteTimeDomainData(dataArray);
+
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            canvasCtx.lineWidth = 2.5;
+            canvasCtx.strokeStyle = '#E64A19'; // Warm orange wave
+            canvasCtx.beginPath();
+
+            const sliceWidth = canvas.width * 1.0 / bufferLength;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const v = dataArray[i] / 128.0;
+                const y = v * canvas.height / 2;
+                if (i === 0) canvasCtx.moveTo(x, y);
+                else canvasCtx.lineTo(x, y);
+                x += sliceWidth;
+            }
+            canvasCtx.lineTo(canvas.width, canvas.height / 2);
+            canvasCtx.stroke();
+        }
+
+        async function fetchGeminiResponse(promptText) {
+            // Add user's new message to the running history array
+            conversationLog.push({
+                role: "user",
+                parts: [{ text: promptText }]
+            });
+
+            // Creates a temporary AI loading bubble
+            const aiBubble = document.createElement('div');
+            aiBubble.className = 'message ai-msg';
+            aiBubble.textContent = '...';
+            chatContainer.appendChild(aiBubble);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${GEMINI_API_KEY}`;
+            
+            const payload = {
+                systemInstruction: {
+                    parts: [{ text: "You are an empathetic, warm conversational AI providing emotional support. Listen carefully to the user's dictated thoughts, validate their feelings, and respond with thoughtful, natural conversational dialogue. Keep responses relatively brief and conversational, avoiding overly dense text blocks." }]
+                },
+                contents: conversationLog // Sends the whole history instead of just one prompt
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.candidates &&
