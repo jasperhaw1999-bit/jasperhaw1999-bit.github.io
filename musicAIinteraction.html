@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <title>Lyria Flow Studio</title>
     <style>
-        /* Upgraded to Plus Jakarta Sans for the exact geometric look from the mockups */
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        /* Restored the Merriweather serif font from your voice interaction code */
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap');
 
         body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
+            font-family: 'Merriweather', 'Georgia', serif; 
             background-color: #F3F0F8; 
             margin: 0;
             display: flex;
@@ -65,9 +65,9 @@
             padding: 16px 20px;
             border-radius: 12px;
             max-width: 80%;
-            font-size: 15px;
-            line-height: 1.5;
-            word-wrap: break-word; /* Ensures long text wraps */
+            font-size: 15.5px;
+            line-height: 1.6;
+            word-wrap: break-word; 
         }
 
         .system-msg {
@@ -94,31 +94,35 @@
             align-items: center;
         }
 
-        /* Swapped to textarea for multiline wrapping support */
         .input-area textarea {
             flex-grow: 1;
             border: none;
             outline: none;
-            font-size: 15px;
+            font-size: 15.5px;
             padding: 8px 12px;
             background: transparent;
-            font-family: inherit;
+            font-family: 'Merriweather', 'Georgia', serif;
             resize: none;
             height: 40px;
             box-sizing: border-box;
             overflow-y: auto;
         }
 
+        .input-area textarea::placeholder {
+            font-family: 'Merriweather', 'Georgia', serif;
+            color: #999;
+        }
+
         .input-area button {
             background: #7D52B8;
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 10px 24px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: 700;
             font-size: 15px;
-            font-family: inherit;
+            font-family: 'Merriweather', 'Georgia', serif;
             transition: opacity 0.2s;
             height: 44px;
         }
@@ -166,7 +170,6 @@
         </div>
 
         <div class="input-area">
-            <!-- Changed to textarea so long prompts wrap automatically -->
             <textarea id="promptInput" placeholder="Describe the arrangement..."></textarea>
             <button id="sendBtn">Send</button>
         </div>
@@ -190,7 +193,6 @@
             return bubble;
         }
 
-        // Upgraded parser to find BOTH audio and image data in the API payload
         function extractMediaFromJSON(obj) {
             let media = { audioURL: null, imageURL: null };
             
@@ -264,7 +266,6 @@
                         mediaContainer.className = 'media-container';
                         mediaContainer.style.marginTop = '12px';
 
-                        // Appends the cover art if the API provided one
                         if (media.imageURL) {
                             const img = document.createElement('img');
                             img.src = media.imageURL;
@@ -272,7 +273,6 @@
                             mediaContainer.appendChild(img);
                         }
 
-                        // Appends the audio player
                         if (media.audioURL) {
                             const player = document.createElement('audio');
                             player.controls = true;
@@ -305,7 +305,6 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         });
 
-        // Allows submitting the textarea by pressing Enter (and Shift+Enter for a new line)
         promptInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
