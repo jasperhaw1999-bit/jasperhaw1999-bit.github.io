@@ -2,391 +2,271 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Resonance | Emotional Support</title>
+    <title>Lyria Flow Studio</title>
     <style>
+        /* Matches the Lyria Flow Studio mockup aesthetic */
         body { 
-            /* Clean sans-serif for the overall UI */
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; 
-            background-color: #FFF6ED; 
-            color: #3E2723;
+            background-color: #F3F0F8; 
             margin: 0;
             display: flex;
-            flex-direction: column;
-            height: 100vh;
+            justify-content: center;
             align-items: center;
+            height: 100vh;
+        }
+
+        .studio-container {
+            background: #FFFFFF;
+            width: 100%;
+            max-width: 700px;
+            height: 85vh;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            box-sizing: border-box;
         }
 
         .header {
-            width: 100%;
-            padding: 20px 0;
-            text-align: center;
-            background-color: #FFE0B2;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #E8E2F0;
+            margin-bottom: 20px;
+        }
+
+        .header svg {
+            width: 24px;
+            height: 24px;
+            fill: #7D52B8; /* Signature purple tone */
         }
 
         .header h2 {
             margin: 0;
-            font-weight: 600;
-            font-size: 24px;
-            color: #D84315;
+            font-size: 20px;
+            color: #7D52B8;
+            font-weight: 700;
         }
 
         #chatContainer {
             flex-grow: 1;
-            width: 100%;
-            max-width: 800px;
-            padding: 30px 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            box-sizing: border-box;
+            gap: 16px;
+            padding-bottom: 20px;
         }
 
         .message {
-            padding: 15px 22px;
-            border-radius: 18px;
-            max-width: 75%;
-            line-height: 1.6;
-            font-size: 16.5px;
-            /* Highly legible academic serif for the actual conversation text */
-            font-family: Cambria, Georgia, 'Times New Roman', serif;
-            white-space: pre-wrap; 
-            animation: fadeInBubble 0.3s ease-in-out;
+            padding: 16px 20px;
+            border-radius: 12px;
+            max-width: 80%;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .system-msg {
+            background-color: #F8F6FA;
+            color: #4A4458;
+            align-self: flex-start;
+            border: 1px solid #E8E2F0;
         }
 
         .user-msg {
-            background-color: #FFFFFF;
+            background-color: #7D52B8;
+            color: #FFFFFF;
             align-self: flex-end;
             border-bottom-right-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            border: 1px solid #FFE0B2;
         }
 
-        .ai-msg {
-            background-color: #FFECB3;
-            color: #4E342E;
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
-
-        /* Animation for the streaming text chunks */
-        .fade-in-text {
-            opacity: 0;
-            animation: streamWordFade 0.6s ease-out forwards;
-        }
-
-        @keyframes streamWordFade {
-            0% { opacity: 0; color: rgba(78, 52, 46, 0); }
-            100% { opacity: 1; color: rgba(78, 52, 46, 1); } 
-        }
-
-        @keyframes fadeInBubble {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .controls-wrapper {
-            width: 100%;
-            background: #FFFFFF;
-            border-top: 1px solid #FFE0B2;
-            padding: 20px 0 40px 0;
+        .input-area {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.03);
-        }
-
-        canvas { 
-            background: transparent; 
-            display: block; 
-            width: 100%;
-            max-width: 600px;
-            height: 80px;
-            margin-bottom: 15px;
-        }
-
-        button { 
-            padding: 14px 28px; 
-            font-size: 16px; 
-            font-family: inherit;
-            font-weight: 500;
-            cursor: pointer; 
-            border-radius: 30px; 
-            border: none; 
-            background: #F4511E; 
-            color: white; 
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
             gap: 12px;
-            box-shadow: 0 4px 12px rgba(244, 81, 30, 0.3);
+            background: #FFFFFF;
+            padding: 12px;
+            border: 1px solid #E8E2F0;
+            border-radius: 30px;
+            align-items: center;
         }
 
-        button:hover { background: #D84315; }
+        .input-area input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            padding: 8px 12px;
+            background: transparent;
+        }
+
+        .input-area button {
+            background: #7D52B8;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+
+        .input-area button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         
-        .ear-icon {
-            width: 22px;
-            height: 22px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+        .loading {
+            font-style: italic;
+            color: #888;
         }
 
-        .status {
-            font-size: 0.9em;
-            color: #8D6E63;
-            margin-top: 15px;
+        audio {
+            margin-top: 10px;
+            width: 100%;
+            height: 40px;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2>Resonance: A Listening Ear</h2>
-    </div>
-
-    <div id="chatContainer">
-        <div class="message ai-msg">Hello. Take a deep breath. I'm here to listen whenever you are ready to speak.</div>
-    </div>
-
-    <div class="controls-wrapper">
-        <canvas id="visualizer" width="600" height="80"></canvas>
-        <button id="recordBtn">
-            <svg class="ear-icon" viewBox="0 0 24 24">
-                <path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"></path>
-                <path d="M15 8.5a2.5 2.5 0 0 0-5 0v1a2 2 0 1 1 0 4"></path>
+    <div class="studio-container">
+        <div class="header">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
             </svg>
-            <span id="btnText">Begin Dictation</span>
-        </button>
-        <div id="statusText" class="status">Click to open your microphone.</div>
+            <h2>Lyria Flow Studio</h2>
+        </div>
+
+        <div id="chatContainer">
+            <div class="message system-msg">
+                Welcome to the studio. Describe the vibe you want, or hum a melody to get started.
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="promptInput" placeholder="Describe the arrangement..." />
+            <button id="sendBtn">Send</button>
+        </div>
     </div>
 
     <script>
         const GEMINI_API_KEY = "AQ.Ab8RN6KotfNZ7t_-" + "v0kH6km0uumNoTRzspIPkvvgHmtHwbVOPg";
         
-        let audioContext, analyser, animationId, stream;
-        const recordBtn = document.getElementById('recordBtn');
-        const btnText = document.getElementById('btnText');
-        const canvas = document.getElementById('visualizer');
-        const canvasCtx = canvas.getContext('2d');
-        const statusText = document.getElementById('statusText');
         const chatContainer = document.getElementById('chatContainer');
+        const promptInput = document.getElementById('promptInput');
+        const sendBtn = document.getElementById('sendBtn');
 
-        let conversationLog = [];
-        let activeUserBubble = null;
+        // Handles server-side state for the Interactions API
+        let previousInteractionId = null;
 
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            statusText.textContent = "Speech Recognition API not supported in this browser. Please use Chrome.";
-            recordBtn.disabled = true;
-        }
-        
-        const recognition = new SpeechRecognition();
-        recognition.continuous = true; 
-        recognition.interimResults = true; 
-        recognition.lang = 'en-US';
-
-        let isRecording = false;
-
-        recordBtn.addEventListener('click', async () => {
-            if (!isRecording) {
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const source = audioContext.createMediaStreamSource(stream);
-                    analyser = audioContext.createAnalyser();
-                    analyser.fftSize = 2048;
-                    source.connect(analyser);
-                    
-                    drawWaveform();
-                    recognition.start();
-                    
-                    activeUserBubble = document.createElement('div');
-                    activeUserBubble.className = 'message user-msg';
-                    activeUserBubble.textContent = '...';
-                    chatContainer.appendChild(activeUserBubble);
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                    
-                    btnText.textContent = "Stop & Reflect";
-                    recordBtn.style.background = "#D32F2F"; 
-                    statusText.textContent = "Listening... Take your time.";
-                    isRecording = true;
-                    
-                } catch (err) {
-                    statusText.textContent = "Microphone access denied.";
-                }
-            } else {
-                isRecording = false;
-                recognition.stop();
-                statusText.textContent = "Processing your thoughts...";
-                
-                const finalTranscript = activeUserBubble.textContent;
-                
-                if (finalTranscript !== '...' && finalTranscript.trim() !== '') {
-                    await fetchGeminiResponse(finalTranscript);
-                } else {
-                    activeUserBubble.remove();
-                    statusText.textContent = "No speech detected. Click to try again.";
-                }
-                
-                stopRecordingState();
-            }
-        });
-
-        recognition.onresult = (event) => {
-            let currentText = '';
-            for (let i = 0; i < event.results.length; i++) {
-                currentText += event.results[i][0].transcript;
-            }
-            if (activeUserBubble) {
-                activeUserBubble.textContent = currentText;
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }
-        };
-
-        recognition.onerror = (event) => {
-            statusText.textContent = "Error occurred: " + event.error;
-            stopRecordingState();
-        };
-
-        function stopRecordingState() {
-            btnText.textContent = "Begin Dictation";
-            recordBtn.style.background = "#F4511E";
-            
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-            if (audioContext) {
-                audioContext.close();
-            }
-            cancelAnimationFrame(animationId);
-            
-            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-            canvasCtx.lineWidth = 2;
-            canvasCtx.strokeStyle = '#FFCC80';
-            canvasCtx.beginPath();
-            canvasCtx.moveTo(0, canvas.height / 2);
-            canvasCtx.lineTo(canvas.width, canvas.height / 2);
-            canvasCtx.stroke();
-        }
-
-        function drawWaveform() {
-            animationId = requestAnimationFrame(drawWaveform);
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            analyser.getByteTimeDomainData(dataArray);
-
-            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-            canvasCtx.lineWidth = 2.5;
-            canvasCtx.strokeStyle = '#E64A19'; 
-            canvasCtx.beginPath();
-
-            const sliceWidth = canvas.width * 1.0 / bufferLength;
-            let x = 0;
-
-            for (let i = 0; i < bufferLength; i++) {
-                const v = dataArray[i] / 128.0;
-                const y = v * canvas.height / 2;
-                if (i === 0) canvasCtx.moveTo(x, y);
-                else canvasCtx.lineTo(x, y);
-                x += sliceWidth;
-            }
-            canvasCtx.lineTo(canvas.width, canvas.height / 2);
-            canvasCtx.stroke();
-        }
-
-        async function fetchGeminiResponse(promptText) {
-            conversationLog.push({
-                role: "user",
-                parts: [{ text: promptText }]
-            });
-
-            const aiBubble = document.createElement('div');
-            aiBubble.className = 'message ai-msg';
-            chatContainer.appendChild(aiBubble);
+        function addMessage(text, isUser = false) {
+            const bubble = document.createElement('div');
+            bubble.className = isUser ? 'message user-msg' : 'message system-msg';
+            bubble.textContent = text;
+            chatContainer.appendChild(bubble);
             chatContainer.scrollTop = chatContainer.scrollHeight;
+            return bubble;
+        }
 
-            // Connected to the correct gemini-1.5-pro model for text streaming
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
+        sendBtn.addEventListener('click', async () => {
+            const text = promptInput.value.trim();
+            if (!text) return;
             
-            const payload = {
-                systemInstruction: {
-                    parts: [{ text: "You are an empathetic, warm conversational AI providing emotional support. Listen carefully to the user's dictated thoughts, validate their feelings, and respond with thoughtful, natural conversational dialogue. Keep responses relatively brief and conversational, avoiding overly dense text blocks." }]
-                },
-                contents: conversationLog 
-            };
+            promptInput.value = '';
+            addMessage(text, true);
+            sendBtn.disabled = true;
+
+            const loadingBubble = addMessage("Generating audio... (This usually takes 15-30 seconds)", false);
+            loadingBubble.classList.add('loading');
 
             try {
+                // Connected to the new Interactions API endpoint
+                const url = `https://generativelanguage.googleapis.com/v1beta/interactions?key=${GEMINI_API_KEY}`;
+                
+                // Using the specific 30-second clip model you requested
+                const payload = {
+                    model: "lyria-3-clip-preview",
+                    input: text
+                };
+
+                // Chains the conversation history if a previous turn exists
+                if (previousInteractionId) {
+                    payload.previous_interaction_id = previousInteractionId;
+                }
+
                 const response = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
-                
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder("utf-8");
-                let buffer = '';
-                let fullAiText = '';
 
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
+                const data = await response.json();
+                loadingBubble.remove();
+
+                if (response.ok) {
+                    // Update state ID for the next conversational turn
+                    if (data.id) {
+                        previousInteractionId = data.id;
+                    }
+
+                    const resultBubble = document.createElement('div');
+                    resultBubble.className = 'message system-msg';
                     
-                    buffer += decoder.decode(value, { stream: true });
-                    const lines = buffer.split('\n');
-                    buffer = lines.pop(); 
+                    let audioSource = null;
                     
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            const dataStr = line.slice(6);
-                            if (dataStr === '[DONE]') continue;
-                            
-                            try {
-                                const data = JSON.parse(dataStr);
-                                if (data.candidates && data.candidates[0].content.parts[0].text) {
-                                    const chunkText = data.candidates[0].content.parts[0].text;
-                                    fullAiText += chunkText;
-                                    
-                                    const words = chunkText.split(/(\s+)/);
-                                    words.forEach(word => {
-                                        if (word.length > 0) {
-                                            const span = document.createElement('span');
-                                            span.textContent = word;
-                                            if (word.trim() !== '') {
-                                                span.className = 'fade-in-text';
-                                            }
-                                            aiBubble.appendChild(span);
-                                        }
-                                    });
-                                    
-                                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                                }
-                            } catch (e) {
-                                console.error("Error parsing stream chunk:", e);
-                            }
+                    // Extracts the audio payload from the Interactions response format
+                    if (data.model_output && data.model_output.parts) {
+                        const audioPart = data.model_output.parts.find(p => p.inlineData || p.inline_data);
+                        if (audioPart) {
+                            const inline = audioPart.inlineData || audioPart.inline_data;
+                            audioSource = `data:${inline.mimeType || 'audio/mp3'};base64,${inline.data}`;
                         }
                     }
+
+                    // Fallback parser in case Lyria returns a raw URL link instead of Base64
+                    if (!audioSource && data.output_text && data.output_text.includes('http')) {
+                        const urlMatch = data.output_text.match(/https?:\/\/[^\s]+/);
+                        if (urlMatch) audioSource = urlMatch[0];
+                        resultBubble.textContent = data.output_text.replace(audioSource, '').trim();
+                    } else {
+                        resultBubble.textContent = data.output_text || "Here is your generated arrangement:";
+                    }
+
+                    if (audioSource) {
+                        const player = document.createElement('audio');
+                        player.controls = true;
+                        player.src = audioSource;
+                        resultBubble.appendChild(player);
+                    } else {
+                        resultBubble.textContent += "\n(Audio data could not be parsed from the API response)";
+                        console.log("Full API Response:", data);
+                    }
+
+                    chatContainer.appendChild(resultBubble);
+
+                } else {
+                    addMessage(`API Error: ${data.error?.message || "Unknown error"}`);
+                    console.error("API Error", data);
                 }
-                
-                statusText.textContent = "Ready.";
-                
-                conversationLog.push({
-                    role: "model",
-                    parts: [{ text: fullAiText }]
-                });
 
             } catch (error) {
-                aiBubble.textContent = "Error connecting to Gemini API network.";
-                conversationLog.pop();
+                loadingBubble.remove();
+                addMessage("Network error communicating with the Interactions API.");
+                console.error(error);
             }
-        }
-        
-        stopRecordingState();
+            
+            sendBtn.disabled = false;
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
+
+        promptInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !sendBtn.disabled) {
+                sendBtn.click();
+            }
+        });
     </script>
 </body>
 </html>
