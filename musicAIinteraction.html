@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <title>Lyria Flow Studio</title>
     <style>
-        /* Matches the Lyria Flow Studio mockup aesthetic */
+        /* Imported Nunito to match the rounded, friendly aesthetic of the mockup */
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
         body { 
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; 
+            font-family: 'Nunito', sans-serif; 
             background-color: #F3F0F8; 
             margin: 0;
             display: flex;
@@ -40,7 +42,7 @@
         .header svg {
             width: 24px;
             height: 24px;
-            fill: #7D52B8; /* Signature purple tone */
+            fill: #7D52B8;
         }
 
         .header h2 {
@@ -98,6 +100,7 @@
             font-size: 15px;
             padding: 8px 12px;
             background: transparent;
+            font-family: inherit;
         }
 
         .input-area button {
@@ -107,8 +110,9 @@
             padding: 10px 24px;
             border-radius: 20px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: 700;
+            font-size: 15px;
+            font-family: inherit;
             transition: opacity 0.2s;
         }
 
@@ -123,7 +127,7 @@
         }
 
         audio {
-            margin-top: 10px;
+            margin-top: 12px;
             width: 100%;
             height: 40px;
             border-radius: 8px;
@@ -159,7 +163,6 @@
         const promptInput = document.getElementById('promptInput');
         const sendBtn = document.getElementById('sendBtn');
 
-        // Handles server-side state for the Interactions API
         let previousInteractionId = null;
 
         function addMessage(text, isUser = false) {
@@ -169,6 +172,37 @@
             chatContainer.appendChild(bubble);
             chatContainer.scrollTop = chatContainer.scrollHeight;
             return bubble;
+        }
+
+        // Deep search function to find the audio payload no matter where it is nested
+        function extractAudioFromJSON(obj) {
+            let audioURL = null;
+            
+            function search(node) {
+                if (audioURL) return; 
+                if (node && typeof node === 'object') {
+                    // Looks for raw Base64 data
+                    if ((node.mimeType || node.mime_type) && node.data) {
+                        const mime = node.mimeType || node.mime_type;
+                        if (mime.includes('audio')) {
+                            audioURL = `data:${mime};base64,${node.data}`;
+                            return;
+                        }
+                    }
+                    // Looks for a hosted Google Cloud URI link
+                    if (node.fileUri || node.file_uri) {
+                        audioURL = node.fileUri || node.file_uri;
+                        return;
+                    }
+                    // Recursively check all nested properties
+                    for (let key in node) {
+                        search(node[key]);
+                    }
+                }
+            }
+            
+            search(obj);
+            return audioURL;
         }
 
         sendBtn.addEventListener('click', async () => {
@@ -183,16 +217,13 @@
             loadingBubble.classList.add('loading');
 
             try {
-                // Connected to the new Interactions API endpoint
                 const url = `https://generativelanguage.googleapis.com/v1beta/interactions?key=${GEMINI_API_KEY}`;
                 
-                // Using the specific 30-second clip model you requested
                 const payload = {
                     model: "lyria-3-clip-preview",
                     input: text
                 };
 
-                // Chains the conversation history if a previous turn exists
                 if (previousInteractionId) {
                     payload.previous_interaction_id = previousInteractionId;
                 }
@@ -207,42 +238,25 @@
                 loadingBubble.remove();
 
                 if (response.ok) {
-                    // Update state ID for the next conversational turn
-                    if (data.id) {
-                        previousInteractionId = data.id;
-                    }
+                    if (data.id) previousInteractionId = data.id;
 
                     const resultBubble = document.createElement('div');
                     resultBubble.className = 'message system-msg';
                     
-                    let audioSource = null;
-                    
-                    // Extracts the audio payload from the Interactions response format
-                    if (data.model_output && data.model_output.parts) {
-                        const audioPart = data.model_output.parts.find(p => p.inlineData || p.inline_data);
-                        if (audioPart) {
-                            const inline = audioPart.inlineData || audioPart.inline_data;
-                            audioSource = `data:${inline.mimeType || 'audio/mp3'};base64,${inline.data}`;
-                        }
-                    }
-
-                    // Fallback parser in case Lyria returns a raw URL link instead of Base64
-                    if (!audioSource && data.output_text && data.output_text.includes('http')) {
-                        const urlMatch = data.output_text.match(/https?:\/\/[^\s]+/);
-                        if (urlMatch) audioSource = urlMatch[0];
-                        resultBubble.textContent = data.output_text.replace(audioSource, '').trim();
-                    } else {
-                        resultBubble.textContent = data.output_text || "Here is your generated arrangement:";
-                    }
+                    const audioSource = extractAudioFromJSON(data);
 
                     if (audioSource) {
+                        resultBubble.textContent = "Here is your generated arrangement:";
                         const player = document.createElement('audio');
                         player.controls = true;
                         player.src = audioSource;
                         resultBubble.appendChild(player);
                     } else {
-                        resultBubble.textContent += "\n(Audio data could not be parsed from the API response)";
-                        console.log("Full API Response:", data);
+                        // If parsing still fails, prints the raw JSON API output so we can see the exact error
+                        resultBubble.textContent = "Audio data could not be found. Raw API response:\n\n" + JSON.stringify(data, null, 2);
+                        resultBubble.style.whiteSpace = "pre-wrap";
+                        resultBubble.style.fontFamily = "monospace";
+                        resultBubble.style.fontSize = "13px";
                     }
 
                     chatContainer.appendChild(resultBubble);
