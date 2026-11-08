@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <title>Lyria Flow Studio</title>
     <style>
-        /* Imported Nunito to match the rounded, friendly aesthetic of the mockup */
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+        /* Upgraded to Plus Jakarta Sans for the exact geometric look from the mockups */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
         body { 
-            font-family: 'Nunito', sans-serif; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
             background-color: #F3F0F8; 
             margin: 0;
             display: flex;
@@ -67,6 +67,7 @@
             max-width: 80%;
             font-size: 15px;
             line-height: 1.5;
+            word-wrap: break-word; /* Ensures long text wraps */
         }
 
         .system-msg {
@@ -87,13 +88,14 @@
             display: flex;
             gap: 12px;
             background: #FFFFFF;
-            padding: 12px;
+            padding: 8px 12px;
             border: 1px solid #E8E2F0;
-            border-radius: 30px;
+            border-radius: 24px;
             align-items: center;
         }
 
-        .input-area input {
+        /* Swapped to textarea for multiline wrapping support */
+        .input-area textarea {
             flex-grow: 1;
             border: none;
             outline: none;
@@ -101,19 +103,24 @@
             padding: 8px 12px;
             background: transparent;
             font-family: inherit;
+            resize: none;
+            height: 40px;
+            box-sizing: border-box;
+            overflow-y: auto;
         }
 
         .input-area button {
             background: #7D52B8;
             color: white;
             border: none;
-            padding: 10px 24px;
+            padding: 12px 24px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: 700;
             font-size: 15px;
             font-family: inherit;
             transition: opacity 0.2s;
+            height: 44px;
         }
 
         .input-area button:disabled {
@@ -126,8 +133,16 @@
             color: #888;
         }
 
-        audio {
-            margin-top: 12px;
+        .media-container img {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: block;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .media-container audio {
             width: 100%;
             height: 40px;
             border-radius: 8px;
@@ -151,7 +166,8 @@
         </div>
 
         <div class="input-area">
-            <input type="text" id="promptInput" placeholder="Describe the arrangement..." />
+            <!-- Changed to textarea so long prompts wrap automatically -->
+            <textarea id="promptInput" placeholder="Describe the arrangement..."></textarea>
             <button id="sendBtn">Send</button>
         </div>
     </div>
@@ -174,27 +190,23 @@
             return bubble;
         }
 
-        // Deep search function to find the audio payload no matter where it is nested
-        function extractAudioFromJSON(obj) {
-            let audioURL = null;
+        // Upgraded parser to find BOTH audio and image data in the API payload
+        function extractMediaFromJSON(obj) {
+            let media = { audioURL: null, imageURL: null };
             
             function search(node) {
-                if (audioURL) return; 
                 if (node && typeof node === 'object') {
-                    // Looks for raw Base64 data
                     if ((node.mimeType || node.mime_type) && node.data) {
                         const mime = node.mimeType || node.mime_type;
-                        if (mime.includes('audio')) {
-                            audioURL = `data:${mime};base64,${node.data}`;
-                            return;
+                        
+                        if (mime.includes('audio') && !media.audioURL) {
+                            media.audioURL = `data:${mime};base64,${node.data}`;
+                        }
+                        if (mime.includes('image') && !media.imageURL) {
+                            media.imageURL = `data:${mime};base64,${node.data}`;
                         }
                     }
-                    // Looks for a hosted Google Cloud URI link
-                    if (node.fileUri || node.file_uri) {
-                        audioURL = node.fileUri || node.file_uri;
-                        return;
-                    }
-                    // Recursively check all nested properties
+                    
                     for (let key in node) {
                         search(node[key]);
                     }
@@ -202,7 +214,7 @@
             }
             
             search(obj);
-            return audioURL;
+            return media;
         }
 
         sendBtn.addEventListener('click', async () => {
@@ -243,17 +255,34 @@
                     const resultBubble = document.createElement('div');
                     resultBubble.className = 'message system-msg';
                     
-                    const audioSource = extractAudioFromJSON(data);
+                    const media = extractMediaFromJSON(data);
 
-                    if (audioSource) {
+                    if (media.audioURL || media.imageURL) {
                         resultBubble.textContent = "Here is your generated arrangement:";
-                        const player = document.createElement('audio');
-                        player.controls = true;
-                        player.src = audioSource;
-                        resultBubble.appendChild(player);
+                        
+                        const mediaContainer = document.createElement('div');
+                        mediaContainer.className = 'media-container';
+                        mediaContainer.style.marginTop = '12px';
+
+                        // Appends the cover art if the API provided one
+                        if (media.imageURL) {
+                            const img = document.createElement('img');
+                            img.src = media.imageURL;
+                            img.alt = "Generated track cover art";
+                            mediaContainer.appendChild(img);
+                        }
+
+                        // Appends the audio player
+                        if (media.audioURL) {
+                            const player = document.createElement('audio');
+                            player.controls = true;
+                            player.src = media.audioURL;
+                            mediaContainer.appendChild(player);
+                        }
+
+                        resultBubble.appendChild(mediaContainer);
                     } else {
-                        // If parsing still fails, prints the raw JSON API output so we can see the exact error
-                        resultBubble.textContent = "Audio data could not be found. Raw API response:\n\n" + JSON.stringify(data, null, 2);
+                        resultBubble.textContent = "Media data could not be found. Raw API response:\n\n" + JSON.stringify(data, null, 2);
                         resultBubble.style.whiteSpace = "pre-wrap";
                         resultBubble.style.fontFamily = "monospace";
                         resultBubble.style.fontSize = "13px";
@@ -276,9 +305,11 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         });
 
-        promptInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !sendBtn.disabled) {
-                sendBtn.click();
+        // Allows submitting the textarea by pressing Enter (and Shift+Enter for a new line)
+        promptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!sendBtn.disabled) sendBtn.click();
             }
         });
     </script>
