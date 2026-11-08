@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Lyria Flow Studio</title>
+    <title>Euterpe</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap');
 
@@ -38,7 +38,7 @@
             margin-bottom: 20px;
         }
 
-        .header svg {
+        .header svg.logo {
             width: 24px;
             height: 24px;
             fill: #7D52B8;
@@ -90,7 +90,7 @@
             padding: 12px;
             border: 1px solid #E8E2F0;
             border-radius: 24px;
-            align-items: flex-end; /* Keeps buttons aligned to the bottom when text wraps */
+            align-items: flex-end; 
         }
 
         .mic-btn {
@@ -107,11 +107,20 @@
         }
 
         .mic-btn:hover { background: #F8F6FA; }
-        .mic-btn svg { width: 24px; height: 24px; fill: #7D52B8; transition: fill 0.2s; }
         
-        /* Animation when recording */
+        .mic-btn svg { 
+            width: 24px; 
+            height: 24px; 
+            stroke: #7D52B8; 
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.2s; 
+        }
+        
         .mic-btn.recording svg { 
-            fill: #D32F2F; 
+            stroke: #D32F2F; 
             animation: pulse 1.5s infinite; 
         }
 
@@ -130,7 +139,7 @@
             background: transparent;
             font-family: 'Merriweather', 'Georgia', serif;
             resize: none;
-            height: 64px; /* Increased height prevents text clipping */
+            height: 64px; 
             box-sizing: border-box;
             overflow-y: auto;
             line-height: 1.4;
@@ -180,29 +189,59 @@
             height: 40px;
             border-radius: 8px;
         }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 8px 16px;
+            background-color: transparent;
+            color: #7D52B8;
+            border: 2px solid #7D52B8;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Merriweather', 'Georgia', serif;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .download-btn:hover {
+            background-color: #7D52B8;
+            color: #FFFFFF;
+        }
+
+        .download-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            stroke: none;
+        }
     </style>
 </head>
 <body>
 
     <div class="studio-container">
         <div class="header">
-            <svg viewBox="0 0 24 24">
+            <svg class="logo" viewBox="0 0 24 24">
                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
             </svg>
-            <h2>Lyria Flow Studio</h2>
+            <h2>Euterpe</h2>
         </div>
 
         <div id="chatContainer">
             <div class="message system-msg">
-                Welcome to the studio. Describe the vibe you want, or hum a melody to get started.
+                Welcome to Euterpe. Describe the vibe you want, or hum a melody to get started.
             </div>
         </div>
 
         <div class="input-area">
             <button id="micBtn" class="mic-btn" title="Record Audio">
                 <svg viewBox="0 0 24 24">
-                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    <path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"></path>
+                    <path d="M15 8.5a2.5 2.5 0 0 0-5 0v1a2 2 0 1 1 0 4"></path>
                 </svg>
             </button>
             <textarea id="promptInput" placeholder="Describe the arrangement or hum a melody..."></textarea>
@@ -220,7 +259,6 @@
 
         let previousInteractionId = null;
         
-        // Audio recording variables
         let mediaRecorder;
         let audioChunks = [];
         let attachedAudioB64 = null;
@@ -255,15 +293,12 @@
             return media;
         }
 
-        // Handle Microphone click logic
         micBtn.addEventListener('click', async () => {
             if (mediaRecorder && mediaRecorder.state === 'recording') {
-                // Stop recording
                 mediaRecorder.stop();
                 micBtn.classList.remove('recording');
                 promptInput.placeholder = "Audio attached. Add a text description...";
             } else {
-                // Start recording
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
@@ -280,7 +315,6 @@
                         const reader = new FileReader();
                         reader.readAsDataURL(audioBlob);
                         reader.onloadend = () => {
-                            // Extract just the raw base64 string
                             attachedAudioB64 = reader.result.split(',')[1]; 
                         };
                         
@@ -289,7 +323,7 @@
                     
                     mediaRecorder.start();
                     micBtn.classList.add('recording');
-                    promptInput.placeholder = "Listening... Click mic again to stop.";
+                    promptInput.placeholder = "Listening... Click ear icon again to stop.";
                 } catch (err) {
                     console.error("Microphone access error:", err);
                     alert("Microphone access denied. Please check your browser permissions.");
@@ -304,7 +338,6 @@
             promptInput.value = '';
             promptInput.placeholder = "Describe the arrangement or hum a melody...";
             
-            // Show what the user sent
             let displayMsg = text || "[Audio Input Attached]";
             if (text && attachedAudioB64) displayMsg = "[Audio] " + text;
             addMessage(displayMsg, true);
@@ -317,7 +350,6 @@
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/interactions?key=${GEMINI_API_KEY}`;
                 
-                // If multimodal audio is attached, structure the input as an array
                 let inputPayload = text;
                 if (attachedAudioB64) {
                     inputPayload = [];
@@ -336,7 +368,6 @@
                     payload.previous_interaction_id = previousInteractionId;
                 }
 
-                // Clear the attached audio immediately after sending so it doesn't double-send
                 attachedAudioB64 = null;
                 attachedMimeType = null;
 
@@ -376,6 +407,18 @@
                             player.controls = true;
                             player.src = media.audioURL;
                             mediaContainer.appendChild(player);
+
+                            const downloadLink = document.createElement('a');
+                            downloadLink.href = media.audioURL;
+                            downloadLink.download = "Euterpe_Track.mp3";
+                            downloadLink.className = "download-btn";
+                            downloadLink.innerHTML = `
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                                </svg>
+                                Download Track
+                            `;
+                            mediaContainer.appendChild(downloadLink);
                         }
 
                         resultBubble.appendChild(mediaContainer);
