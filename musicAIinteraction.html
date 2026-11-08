@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Lyria Flow Studio</title>
     <style>
-        /* Restored the Merriweather serif font from your voice interaction code */
         @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap');
 
         body { 
@@ -88,10 +87,38 @@
             display: flex;
             gap: 12px;
             background: #FFFFFF;
-            padding: 8px 12px;
+            padding: 12px;
             border: 1px solid #E8E2F0;
             border-radius: 24px;
+            align-items: flex-end; /* Keeps buttons aligned to the bottom when text wraps */
+        }
+
+        .mic-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
             align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+            margin-bottom: 2px;
+        }
+
+        .mic-btn:hover { background: #F8F6FA; }
+        .mic-btn svg { width: 24px; height: 24px; fill: #7D52B8; transition: fill 0.2s; }
+        
+        /* Animation when recording */
+        .mic-btn.recording svg { 
+            fill: #D32F2F; 
+            animation: pulse 1.5s infinite; 
+        }
+
+        @keyframes pulse { 
+            0% { transform: scale(1); } 
+            50% { transform: scale(1.15); } 
+            100% { transform: scale(1); } 
         }
 
         .input-area textarea {
@@ -99,13 +126,14 @@
             border: none;
             outline: none;
             font-size: 15.5px;
-            padding: 8px 12px;
+            padding: 8px 4px;
             background: transparent;
             font-family: 'Merriweather', 'Georgia', serif;
             resize: none;
-            height: 40px;
+            height: 64px; /* Increased height prevents text clipping */
             box-sizing: border-box;
             overflow-y: auto;
+            line-height: 1.4;
         }
 
         .input-area textarea::placeholder {
@@ -113,7 +141,7 @@
             color: #999;
         }
 
-        .input-area button {
+        .input-area button.send-btn {
             background: #7D52B8;
             color: white;
             border: none;
@@ -125,9 +153,10 @@
             font-family: 'Merriweather', 'Georgia', serif;
             transition: opacity 0.2s;
             height: 44px;
+            margin-bottom: 2px;
         }
 
-        .input-area button:disabled {
+        .input-area button.send-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
@@ -170,8 +199,14 @@
         </div>
 
         <div class="input-area">
-            <textarea id="promptInput" placeholder="Describe the arrangement..."></textarea>
-            <button id="sendBtn">Send</button>
+            <button id="micBtn" class="mic-btn" title="Record Audio">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+            </button>
+            <textarea id="promptInput" placeholder="Describe the arrangement or hum a melody..."></textarea>
+            <button id="sendBtn" class="send-btn">Send</button>
         </div>
     </div>
 
@@ -181,8 +216,15 @@
         const chatContainer = document.getElementById('chatContainer');
         const promptInput = document.getElementById('promptInput');
         const sendBtn = document.getElementById('sendBtn');
+        const micBtn = document.getElementById('micBtn');
 
         let previousInteractionId = null;
+        
+        // Audio recording variables
+        let mediaRecorder;
+        let audioChunks = [];
+        let attachedAudioB64 = null;
+        let attachedMimeType = null;
 
         function addMessage(text, isUser = false) {
             const bubble = document.createElement('div');
@@ -195,12 +237,10 @@
 
         function extractMediaFromJSON(obj) {
             let media = { audioURL: null, imageURL: null };
-            
             function search(node) {
                 if (node && typeof node === 'object') {
                     if ((node.mimeType || node.mime_type) && node.data) {
                         const mime = node.mimeType || node.mime_type;
-                        
                         if (mime.includes('audio') && !media.audioURL) {
                             media.audioURL = `data:${mime};base64,${node.data}`;
                         }
@@ -208,23 +248,67 @@
                             media.imageURL = `data:${mime};base64,${node.data}`;
                         }
                     }
-                    
-                    for (let key in node) {
-                        search(node[key]);
-                    }
+                    for (let key in node) { search(node[key]); }
                 }
             }
-            
             search(obj);
             return media;
         }
 
+        // Handle Microphone click logic
+        micBtn.addEventListener('click', async () => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                // Stop recording
+                mediaRecorder.stop();
+                micBtn.classList.remove('recording');
+                promptInput.placeholder = "Audio attached. Add a text description...";
+            } else {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = e => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+                        attachedMimeType = mediaRecorder.mimeType;
+                        
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            // Extract just the raw base64 string
+                            attachedAudioB64 = reader.result.split(',')[1]; 
+                        };
+                        
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+                    
+                    mediaRecorder.start();
+                    micBtn.classList.add('recording');
+                    promptInput.placeholder = "Listening... Click mic again to stop.";
+                } catch (err) {
+                    console.error("Microphone access error:", err);
+                    alert("Microphone access denied. Please check your browser permissions.");
+                }
+            }
+        });
+
         sendBtn.addEventListener('click', async () => {
             const text = promptInput.value.trim();
-            if (!text) return;
+            if (!text && !attachedAudioB64) return;
             
             promptInput.value = '';
-            addMessage(text, true);
+            promptInput.placeholder = "Describe the arrangement or hum a melody...";
+            
+            // Show what the user sent
+            let displayMsg = text || "[Audio Input Attached]";
+            if (text && attachedAudioB64) displayMsg = "[Audio] " + text;
+            addMessage(displayMsg, true);
+            
             sendBtn.disabled = true;
 
             const loadingBubble = addMessage("Generating audio... (This usually takes 15-30 seconds)", false);
@@ -233,14 +317,28 @@
             try {
                 const url = `https://generativelanguage.googleapis.com/v1beta/interactions?key=${GEMINI_API_KEY}`;
                 
+                // If multimodal audio is attached, structure the input as an array
+                let inputPayload = text;
+                if (attachedAudioB64) {
+                    inputPayload = [];
+                    if (text) inputPayload.push({ text: text });
+                    inputPayload.push({
+                        inlineData: { mimeType: attachedMimeType, data: attachedAudioB64 }
+                    });
+                }
+
                 const payload = {
                     model: "lyria-3-clip-preview",
-                    input: text
+                    input: inputPayload
                 };
 
                 if (previousInteractionId) {
                     payload.previous_interaction_id = previousInteractionId;
                 }
+
+                // Clear the attached audio immediately after sending so it doesn't double-send
+                attachedAudioB64 = null;
+                attachedMimeType = null;
 
                 const response = await fetch(url, {
                     method: "POST",
